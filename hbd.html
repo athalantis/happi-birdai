@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Interactive Birthday Card</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e8f0f8;
+            font-family: 'Caveat', cursive;
+            overflow: hidden;
+        }
+
+        /* The main card container */
+        .card {
+            width: 380px;
+            height: 520px;
+            background-color: #7A533E; /* Warm felt brown */
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* Felt texture overlay */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Tablecloth / Platter Base */
+        .tablecloth {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 180px;
+            background: repeating-linear-gradient(
+                90deg,
+                #eef5ff,
+                #eef5ff 20px,
+                #a3cdf4 20px,
+                #a3cdf4 25px
+            );
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Blue Platter */
+        .platter {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 340px;
+            height: 120px;
+            background-color: #8bbbe8;
+            border-radius: 50%;
+            box-shadow: 0 5px 0 #184c8a;
+            border: 8px solid #cce3f9;
+        }
+
+        /* Cake Base */
+        .cake-base {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 260px;
+            height: 140px;
+            background-color: #a06b43;
+            border-radius: 20px;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Cake Frosting */
+        .frosting {
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            width: 280px;
+            height: 90px;
+            background-color: #f7f1e3;
+            border-radius: 40px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .frosting-drip {
+            position: absolute;
+            top: 50px;
+            width: 40px;
+            height: 40px;
+            background-color: #f7f1e3;
+            border-radius: 50%;
+        }
+
+        /* Decorative Oval Plaque */
+        .plaque {
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 80px;
+            background-color: #f7f1e3;
+            border-radius: 50%;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        /* Editable Text */
+        .editable-text {
+            font-size: 28px;
+            color: #2c2c2c;
+            text-align: center;
+            line-height: 1.1;
+            outline: none;
+            border: 1px dashed transparent;
+            padding: 5px;
+            transition: border 0.3s;
+        }
+        
+        .editable-text:hover, .editable-text:focus {
+            border-color: #a3cdf4;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Emojis Styling */
+        .emoji-item {
+            position: absolute;
+            font-size: 35px;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.3));
+            z-index: 15;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+
+        .emoji-item:hover {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        /* Specific Positions */
+        .cat { bottom: 65px; left: 160px; font-size: 50px; }
+        .camera { bottom: 75px; left: 230px; font-size: 40px; }
+        .sunflower-left { bottom: 80px; left: 20px; font-size: 30px; }
+        .sunflower-right { bottom: 80px; left: 300px; font-size: 30px; }
+        
+        /* Calendar setup */
+        .calendar-widget {
+            position: absolute;
+            bottom: 75px;
+            left: 70px;
+            background: #fff;
+            border-radius: 5px;
+            padding: 2px 8px;
+            text-align: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            z-index: 15;
+            transform: rotate(-10deg);
+        }
+        .cal-top { background: #d1323c; height: 10px; width: 100%; border-radius: 3px 3px 0 0; position: absolute; top: 0; left: 0; }
+        .cal-date { margin-top: 10px; font-family: sans-serif; font-weight: bold; font-size: 12px; color: #555; outline: none; }
+
+        /* Strawberries */
+        .s1 { bottom: 250px; left: 50px; font-size: 40px; transform: rotate(-20deg); }
+        .s2 { bottom: 270px; left: 100px; font-size: 40px; transform: rotate(-10deg); }
+        .s3 { bottom: 280px; left: 165px; font-size: 45px; }
+        .s4 { bottom: 270px; left: 230px; font-size: 40px; transform: rotate(10deg); }
+        .s5 { bottom: 250px; left: 280px; font-size: 40px; transform: rotate(20deg); }
+
+        /* Interactive Candles */
+        .candle {
+            position: absolute;
+            font-size: 35px;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.3s;
+        }
+        .c1 { bottom: 320px; left: 80px; }
+        .c2 { bottom: 335px; left: 130px; }
+        .c3 { bottom: 345px; left: 175px; }
+        .c4 { bottom: 335px; left: 220px; }
+        .c5 { bottom: 320px; left: 270px; }
+
+        /* Confetti Animation */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 15px;
+            border-radius: 4px;
+            animation: fall linear forwards;
+            z-index: 50;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(550px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="birthdayCard" onclick="throwConfetti(event)">
+        <!-- Tablecloth & Platter -->
+        <div class="tablecloth"></div>
+        <div class="platter"></div>
+
+        <!-- Main Cake Base -->
+        <div class="cake-base">
+            <div class="frosting">
+                <!-- Creating wavy frosting drips -->
+                <div class="frosting-drip" style="left: 10px;"></div>
+                <div class="frosting-drip" style="left: 50px; top: 60px;"></div>
+                <div class="frosting-drip" style="left: 90px;"></div>
+                <div class="frosting-drip" style="left: 140px; top: 55px;"></div>
+                <div class="frosting-drip" style="left: 190px;"></div>
+                <div class="frosting-drip" style="left: 230px;"></div>
+            </div>
+        </div>
+
+        <!-- Center Plaque -->
+        <div class="plaque" onclick="event.stopPropagation()">
+            <div class="editable-text" contenteditable="true" spellcheck="false">
+                HBD<br>Nuyul!
+            </div>
+        </div>
+
+        <!-- Details & Decorations (Emojis) -->
+        <div class="emoji-item s1">🍓</div>
+        <div class="emoji-item s2">🍓</div>
+        <div class="emoji-item s3">🍓</div>
+        <div class="emoji-item s4">🍓</div>
+        <div class="emoji-item s5">🍓</div>
+
+        <!-- Interactive Candles -->
+        <div class="candle c1" onclick="blowOut(this, event)">🕯️</div>
+        <div class="candle c2" onclick="blowOut(this, event)">🕯️</div>
+        <div class="candle c3" onclick="blowOut(this, event)">🕯️</div>
+        <div class="candle c4" onclick="blowOut(this, event)">🕯️</div>
+        <div class="candle c5" onclick="blowOut(this, event)">🕯️</div>
+
+        <!-- Platter Items -->
+        <div class="emoji-item sunflower-left">🌻</div>
+        
+        <div class="calendar-widget" onclick="event.stopPropagation()">
+            <div class="cal-top"></div>
+            <div class="cal-date editable-text" contenteditable="true" spellcheck="false" style="font-size: 14px;">OCT<br>6<br>2025</div>
+        </div>
+
+        <!-- Using Emojis for the Cat & Camera -->
+        <div class="emoji-item cat">🐈‍⬛</div>
+        <div class="emoji-item camera">📷</div>
+        
+        <div class="emoji-item sunflower-right">🌻</div>
+    </div>
+
+    <script>
+        // Interactive: Blow out candles
+        function blowOut(element, event) {
+            event.stopPropagation(); // Prevents the card's confetti click from triggering
+            if(element.innerText === '🕯️') {
+                element.innerText = '💨';
+                element.style.transform = 'translateY(-10px) scale(0.8)';
+                element.style.opacity = '0.6';
+            } else {
+                element.innerText = '🕯️';
+                element.style.transform = 'translateY(0) scale(1)';
+                element.style.opacity = '1';
+            }
+        }
+
+        // Interactive: Confetti explosion
+        function throwConfetti(event) {
+            const card = document.getElementById('birthdayCard');
+            const colors = ['#a3cdf4', '#d1323c', '#f7f1e3', '#f1c40f', '#e67e22'];
+            
+            for (let i = 0; i < 40; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                
+                // Randomize color, start position, and fall duration
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                
+                // Randomize animation speed and delay
+                const duration = Math.random() * 2 + 2; 
+                confetti.style.animationDuration = duration + 's';
+                
+                card.appendChild(confetti);
+
+                // Clean up DOM after animation ends
+                setTimeout(() => {
+                    confetti.remove();
+                }, duration * 1000);
+            }
+        }
+
+        // Trigger an initial burst of confetti when it loads
+        setTimeout(() => throwConfetti(), 500);
+    </script>
+</body>
+</html>
